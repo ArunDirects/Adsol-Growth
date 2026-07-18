@@ -28,9 +28,13 @@
 </head>
 <body>
 <header class="site">
+  <div class="scroll-progress"><div class="scroll-progress-fill"></div></div>
   <div class="nav">
     <a href="index.html" class="logo">
-      <img src="images/logo-adsol-light.png" alt="ADSOL Digital Marketing logo">
+      <div class="logo-col">
+        <span><span class="ad">AD</span><span class="sol">SOL</span></span>
+        <span class="logo-sub">GROWTH ACADEMY</span>
+      </div>
     </a>
     <nav class="links">
       <a href="index.html">Home</a>
@@ -114,7 +118,8 @@
     <div class="foot-grid">
       <div>
         <div class="logo-col" style="margin-bottom:12px;">
-          <img src="images/logo-adsol-dark.png" alt="ADSOL Digital Marketing logo">
+          <span><span class="ad" style="color:#fff;">AD</span><span class="sol">SOL</span></span>
+          <span class="logo-sub" style="color:rgba(255,255,255,0.5);">GROWTH ACADEMY</span>
         </div>
         <p style="font-size:13.5px; color:rgba(255,255,255,0.55); max-width:260px;">Srikakulam district's first practical Digital Marketing Career Accelerator. Learn. Implement. Earn.</p>
       </div>
@@ -176,17 +181,30 @@ document.getElementById('contactForm')?.addEventListener('submit', function(e){
   window.open(`https://wa.me/919502231780?text=${encodeURIComponent(msg)}`, '_blank');
 });
 
-/* sticky header shadow on scroll */
+/* sticky header shadow + scroll progress bar */
 const siteHeader = document.querySelector('header.site');
+const progressFill = document.querySelector('.scroll-progress-fill');
 const onScroll = () => {
-  if (!siteHeader) return;
-  siteHeader.classList.toggle('scrolled', window.scrollY > 8);
+  if (siteHeader) siteHeader.classList.toggle('scrolled', window.scrollY > 8);
+  if (progressFill){
+    const doc = document.documentElement;
+    const scrollable = doc.scrollHeight - doc.clientHeight;
+    const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+    progressFill.style.width = pct + '%';
+  }
 };
 window.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
 
+/* hero load-in stagger on first paint */
+const loadInEls = document.querySelectorAll('.hero .pin-row, .hero h1, .hero p.lede, .hero .hero-ctas, .hero .seat-card, .hero .founder-card, .page-hero .breadcrumb, .page-hero h1, .page-hero p.lede');
+loadInEls.forEach((el, i) => {
+  el.classList.add('load-in');
+  el.style.animationDelay = (i * 0.09) + 's';
+});
+
 /* scroll-reveal for cards and content blocks */
-const revealSelectors = '.become-card, .feature-card, .road-step, .module-row, .testi-card, .blog-card, .bonus-item, .meta-pill, .niche-chip, .tool-chip, .check-item, .price-card, .value-table, .cert-card, .promise-box, .days-block, .partner-slot, .insta-slot, .process-step, .founder-card';
+const revealSelectors = '.become-card, .feature-card, .road-step, .module-row, .testi-card, .blog-card, .bonus-item, .meta-pill, .niche-chip, .tool-chip, .check-item, .price-card, .value-table, .cert-card, .promise-box, .days-block, .partner-slot, .insta-slot, .process-step, .contact-info-card, .contact-form';
 const revealEls = document.querySelectorAll(revealSelectors);
 if ('IntersectionObserver' in window && revealEls.length){
   revealEls.forEach((el, i) => {
@@ -204,6 +222,35 @@ if ('IntersectionObserver' in window && revealEls.length){
   revealEls.forEach(el => io.observe(el));
 } else {
   revealEls.forEach(el => el.classList.add('reveal', 'in-view'));
+}
+
+/* count-up numerals when they scroll into view */
+const countEls = document.querySelectorAll('.count-up');
+const animateCount = (el) => {
+  const target = parseFloat(el.dataset.target || '0');
+  const prefix = el.dataset.prefix || '';
+  const suffix = el.dataset.suffix || '';
+  const duration = 1200;
+  const start = performance.now();
+  const step = (now) => {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = Math.round(target * eased);
+    el.textContent = prefix + val.toLocaleString('en-IN') + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+};
+if ('IntersectionObserver' in window && countEls.length){
+  const cio = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting){
+        animateCount(entry.target);
+        cio.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  countEls.forEach(el => cio.observe(el));
 }
 </script>
 </body>
